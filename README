@@ -1,0 +1,16 @@
+Simple python code that allows a connection to a carbon-cache sever for graphite.
+This can be used as a python library or a standalone executeable.
+
+from the command line...
+
+	./carbonclient.py -m filesystem._root -v 53
+	./carbonclient.py -c cabonserver.example.com -p 2003 -g prodcution -s myservername -m df_root -v 53
+	./carbonclient.py -c cabonserver.example.com -p 2003 -g prodcution -s myservername -m df_root -v $( df -k / | awk '{print $5}' | sed 's/[^0-9]//g' | tail -1 )
+
+from python
+
+	>>> from carbonclient import update
+	>>> update(metric="filesystem._root", value=53)
+	>>> update(server="cabonserver.example.com", port=2003, group="production", metric="filesystem._root", value=53)
+	>>> update(server="cabonserver.example.com", port=2003, group="production", metric="filesystem._root", value=get_df('/'))
+
