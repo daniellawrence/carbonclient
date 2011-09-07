@@ -7,10 +7,16 @@ from the command line...
 	./carbonclient.py -c cabonserver.example.com -p 2003 -g prodcution -s myservername -m df_root -v 53
 	./carbonclient.py -c cabonserver.example.com -p 2003 -g prodcution -s myservername -m df_root -v $( df -k / | awk '{print $5}' | sed 's/[^0-9]//g' | tail -1 )
 
-from python
+from python - single update
 
 	>>> from carbonclient import update
 	>>> update(metric="filesystem._root", value=53)
 	>>> update(server="cabonserver.example.com", port=2003, group="production", metric="filesystem._root", value=53)
 	>>> update(server="cabonserver.example.com", port=2003, group="production", metric="filesystem._root", value=get_df('/'))
 
+
+from python - bulk update: This takes a dictonary then cuts it up into updates of 500 and submits it as a multiline updater
+
+    >>> from carbonclient import bulkupdate
+	>>> data={'metric_name1': 123, 'metric_name2': 456, 'metric_name3': 789, 'metric_nameN': 1234}
+	>>> bulkupdate(server="carbon.example.com", port=2003, group="production", data=data)
