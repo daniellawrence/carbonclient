@@ -2,7 +2,7 @@
 """
 
     Simple python code that allows a connection to a carbon-cache sever for graphite.
-    Copyright (C) 2013 Daniel Lawrence
+    Copyright (C) 2013 Daniel Lawrence <dannyla@linux.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
