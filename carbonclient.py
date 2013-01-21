@@ -1,15 +1,55 @@
 #!/usr/bin/env python
 """
+
     Simple python code that allows a connection to a carbon-cache sever for graphite.
-    This can be used as a python library or a standalone executeable.
+    Copyright (C) 2013 Daniel Lawrence
 
-    eg.
-    ./carbonclient.py -c cabonserver.example.com -p 2003 -g prodcution -s myservername -m df_root -s 53
-    ./carbonclient.py -c cabonserver.example.com -p 2003 -g prodcution -s myservername -m df_root -s $( df -k / | awk '{print $5}' | sed 's/[^0-9]//g' | tail -1 )
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-    import carbonclient
-    carbon = Carbon()        # Create a new carbon object
-    carbon.submit(group="system",server=None,metric=None,value=None):
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+
+carbonclient
+===============
+
+Simple python code that allows a connection to a carbon-cache sever for graphite.
+This can be used as a python library or a standalone executable.
+
+from the command line...
+--------------------------
+
+    ./carbonclient.py -m filesystem._root -v 53
+    ./carbonclient.py -c cabonserver.example.com -p 2003 -g production -s myservername -m df_root -v 53
+    ./carbonclient.py -c cabonserver.example.com -p 2003 -g production -s myservername -m df_root -v $( df -k / | awk '{print $5}' | sed 's/[^0-9]//g' | tail -1 )
+
+from python - single update
+----------------------------
+
+    >>> from carbonclient import update
+    >>> update(metric = "filesystem._root", value = 53)
+    >>> update(server = "cabonserver.example.com", port = 2003, group = "production", metric = "filesystem._root", value= 53 )
+    >>> update(server = "cabonserver.example.com", port = 2003, group = "production", metric = "filesystem._root", value= get_df('/') )
+
+
+from python - bulk update: 
+---------------------------
+
+This takes a dictionary then cuts it up into updates of 500 and submits it as a multi-line update
+
+    >>> from carbonclient import bulkupdate
+    >>> data={'metric_name1': 123, 'metric_name2': 456, 'metric_name3': 789, 'metric_nameN': 1234}
+    >>> bulkupdate(server = "carbon.example.com", port = 2003, group = "production", data = data)
+
 """
 
 __author__ = "Daniel Lawrence <daniel@danielscottlawrence.com"
@@ -100,7 +140,7 @@ class Carbon(object):
     #------------------------------------------------------------------------------
     def submit(self, message=None):
         """ 
-        If the message/submit are a list, thenn collapse it into a string 
+        If the message / submit are a list, then collapse it into a string 
         then send that string to the carbon server using Carbon.send(message)
         """
         # If submit has been called without a message, then use the stored message in the object
@@ -119,15 +159,15 @@ class Carbon(object):
 		# convert everything to lowercase
         message = message.lower()
 
-		# debu messsage
+		# debug message
         self.Debug("Updating carbon-cache with '%s'" % message.strip())
 
-		# make the conection
+		# make the connection
         self.send(message)
 
     #-----------------------------------------------------------------------------------------------------------------------------------------------------
     def append(self,group=None,server=None,metric=None,value=None, epoch=None):
-        """ Creates Cabon object and sends the updates to the carbon server """
+        """ Creates Carbon object and sends the updates to the carbon server """
 
         # make sure we have a value
         if value == None:
@@ -184,7 +224,7 @@ def bulkupdate(data,carbonserver="carbon",carbonport=2003,group=None,server=None
     carbon.debug = debug                                                                    # set the debug boolean
     record_count = 0                                                                        # counter for how many records have been pushed into one update
     for metric in data.keys():                                                              # loop over all the keys in the dictonary to covert the to the input string
-        record_count = record_count + 1                                                     # incerment the counter so we know when to submit the bulk updates
+        record_count = record_count + 1                                                     # increment the counter so we know when to submit the bulk updates
         carbon.append(group=group,server=server,metric=metric,value=data[metric])           # Convert the kv* to string to updates
         if record_count > MAX_BULK_UPDATE:                                                  # check if we have the correct amount of updates to be submited
             carbon.submit()                                                                 # submit the updates to the carbon-cache server
