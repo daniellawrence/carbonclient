@@ -1,3 +1,6 @@
+Replaced By: https://github.com/daniellawrence/graphitesend
+-----------------------------------------------------------
+
 Simple python code that allows a connection to a carbon-cache sever for graphite.
 This can be used as a python library or a standalone executable.
 
